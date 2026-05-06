@@ -45,28 +45,33 @@ st.markdown('<p class="credit">開発/制作：緒方</p>', unsafe_allow_html=Tr
 st.title('📡 W ⇄ dBμV 相互変換アプリ')
 st.markdown("---")
 
+# --- インピーダンス設定セクション ---
+st.subheader("⚙️ インピーダンス設定")
+impedance = st.radio("使用するインピーダンスを選択してください", [50, 75], index=0, horizontal=True, format_func=lambda x: f"{x} Ω")
+
 # --- 入力切替セクション ---
 mode = st.radio("入力する単位を選択してください", ["W (ワット) を入力", "dBμV を入力"], horizontal=True)
 
 w_val = 0.0
 dbuv_val = 0.0
+v_val = 0.0
 
 if mode == "W (ワット) を入力":
-    w_in = st.number_input("電力 (W)", value=1.0, format="%.4f", step=0.1)
+    w_in = st.number_input(f"電力 (W) [at {impedance}Ω]", value=1.0, format="%.4f", step=0.1)
     w_val = w_in
-    # W -> V -> dBμV (50Ω)
-    v_val = math.sqrt(w_in * 50)
+    # W -> V -> dBμV: V = sqrt(P * R)
+    v_val = math.sqrt(w_in * impedance)
     if v_val > 0:
         dbuv_val = 20 * math.log10(v_val * 10**6)
     else:
         dbuv_val = -float('inf')
 else:
-    dbuv_in = st.number_input("電圧レベル (dBμV)", value=120.0, format="%.2f", step=1.0)
+    dbuv_in = st.number_input(f"電圧レベル (dBμV) [at {impedance}Ω]", value=120.0, format="%.2f", step=1.0)
     dbuv_val = dbuv_in
-    # dBμV -> V -> W (50Ω)
-    # V = 10^((dBμV-120)/20)
+    # dBμV -> V -> W: V = 10^((dBμV-120)/20)
     v_val = 10 ** ((dbuv_in - 120) / 20)
-    w_val = (v_val ** 2) / 50
+    # P = V^2 / R
+    w_val = (v_val ** 2) / impedance
 
 # --- 共通計算 (dBmなど) ---
 mw_val = w_val * 1000
@@ -77,7 +82,7 @@ else:
 
 # --- 表示セクション ---
 st.markdown('<div class="result-box">', unsafe_allow_html=True)
-st.subheader("📊 変換結果 (50Ω系)")
+st.subheader(f"📊 変換結果 ({impedance}Ω系)")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -92,4 +97,8 @@ st.write(f"電力 (mW): **{mw_val:,.2f} mW**")
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("---")
-st.caption("💡 50Ω系において、120dBμV = 1V = 0.02W (13.01dBm) です。")
+# インピーダンスに応じたヒントを表示
+if impedance == 50:
+    st.caption("💡 50Ω系において、120dBμV = 1V = 0.0200W (13.01dBm) です。")
+else:
+    st.caption("💡 75Ω系において、120dBμV = 1V = 0.0133W (11.25dBm) です。")
