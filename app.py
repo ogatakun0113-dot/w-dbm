@@ -86,7 +86,7 @@ st.subheader(f"📊 変換結果 ({impedance}Ω系)")
 
 col1, col2 = st.columns(2)
 with col1:
-    st.metric("電力 (W)", f"{w_val:,.4f} W")
+    st.metric("電力 (W)", f"{w_val:,.3f} W")
     st.metric("電圧レベル (dBμV)", f"{dbuv_val:.2f} dBμV")
 
 with col2:
