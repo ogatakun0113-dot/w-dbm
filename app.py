@@ -57,7 +57,7 @@ dbuv_val = 0.0
 v_val = 0.0
 
 if mode == "W (ワット) を入力":
-    w_in = st.number_input(f"電力 (W) [at {impedance}Ω]", value=1.0, format="%.3f", step=0.1)
+    w_in = st.number_input(f"電力 (W) [at {impedance}Ω]", value=1.0, format="%.4f", step=0.1)
     w_val = w_in
     # W -> V -> dBμV: V = sqrt(P * R)
     v_val = math.sqrt(w_in * impedance)
